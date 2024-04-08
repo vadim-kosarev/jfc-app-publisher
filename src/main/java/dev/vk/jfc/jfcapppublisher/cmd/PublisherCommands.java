@@ -5,6 +5,7 @@ import com.github.rvesse.airline.annotations.Cli;
 import com.github.rvesse.airline.annotations.Command;
 import com.github.rvesse.airline.annotations.Option;
 import com.github.rvesse.airline.help.Help;
+import dev.vk.jfc.jfccommon.dto.ImageMessage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.CommandLineRunner;
@@ -60,11 +61,12 @@ public class PublisherCommands implements CommandLineRunner {
         }
     }
 
-    @Command(name = "publish-message")
+    @Command(name = "publish-message", description = "Loads a file from --file parameter and sends it to MQ")
     public static class PublishCmd extends Cmd {
         @Override
         public void run() {
             if (help.showHelpIfRequested()) return;
+            ImageMessage msg = ImageMessage.builder().build();
             /*
              * - Load jpeg file
              * - Setup message headers

@@ -9,7 +9,6 @@ public class JfcAppPublisherApplication {
 
 	public static void main(String[] args) {
 		SpringApplication.run(JfcAppPublisherApplication.class, args);
-		TestMessage obj = new TestMessage();
 	}
 
 }
