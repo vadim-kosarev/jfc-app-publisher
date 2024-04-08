@@ -22,8 +22,12 @@ repositories {
 }
 
 dependencies {
+
 	implementation("org.springframework.boot:spring-boot-starter")
+	implementation(project(":modules:jfc-common"))
+
 	compileOnly("org.projectlombok:lombok")
+
 	annotationProcessor("org.projectlombok:lombok")
 	testImplementation("org.springframework.boot:spring-boot-starter-test")
 }
