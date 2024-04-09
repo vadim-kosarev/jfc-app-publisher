@@ -32,6 +32,11 @@ public class PublisherCommands implements CommandLineRunner {
         c.run();
     }
 
+    /**
+     * ----------------------------------------------------------------------------------------------------------------
+     * <p>
+     * ----------------------------------------------------------------------------------------------------------------
+     */
     public static abstract class Cmd implements Runnable {
 
         @Option(name = {"-f", "--file"}, description = "File to process")
@@ -41,6 +46,11 @@ public class PublisherCommands implements CommandLineRunner {
         protected HelpOption<Cmd> help;
     }
 
+    /**
+     * ----------------------------------------------------------------------------------------------------------------
+     * <p>
+     * ----------------------------------------------------------------------------------------------------------------
+     */
     @Command(name = "hello")
     public static class HelloCmd extends Cmd {
 
@@ -51,6 +61,11 @@ public class PublisherCommands implements CommandLineRunner {
         }
     }
 
+    /**
+     * ----------------------------------------------------------------------------------------------------------------
+     * <p>
+     * ----------------------------------------------------------------------------------------------------------------
+     */
     @Command(name = "bye")
     public static class ByeCmd extends Cmd {
 
@@ -61,6 +76,11 @@ public class PublisherCommands implements CommandLineRunner {
         }
     }
 
+    /**
+     * ----------------------------------------------------------------------------------------------------------------
+     * <p>
+     * ----------------------------------------------------------------------------------------------------------------
+     */
     @Command(name = "publish-message", description = "Loads a file from --file parameter and sends it to MQ")
     public static class PublishCmd extends Cmd {
         @Override
