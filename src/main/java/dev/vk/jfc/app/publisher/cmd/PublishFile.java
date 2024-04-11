@@ -1,6 +1,7 @@
 package dev.vk.jfc.app.publisher.cmd;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import dev.vk.jfc.app.publisher.config.RabbitMQConfig;
 import dev.vk.jfc.app.publisher.rabbitmq.Client;
 import dev.vk.jfc.jfccommon.dto.ImageMessage;
 import lombok.AllArgsConstructor;
@@ -69,9 +70,10 @@ public class PublishFile implements CmdProcessor.Processor {
                     .andProperties(mqProps)
                     .build();
 
+            RabbitMQConfig config = client.getConfig();
             client.getRabbitTemplate().send(
-                    client.getConfig().getImages_exchange(),
-                    client.getConfig().getImages_routing_key(), mqMessage);
+                    config.getImages_exchange(),
+                    config.getImages_routing_key(), mqMessage);
             logger.info("Message sent");
 
         } catch (Exception e) {

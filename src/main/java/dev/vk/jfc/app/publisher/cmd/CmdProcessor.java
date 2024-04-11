@@ -1,10 +1,14 @@
 package dev.vk.jfc.app.publisher.cmd;
 
+import dev.vk.jfc.app.publisher.rabbitmq.Client;
 import lombok.AllArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
+import org.springframework.context.event.ContextClosedEvent;
+import org.springframework.context.event.ContextStoppedEvent;
+import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
@@ -16,6 +20,7 @@ public class CmdProcessor implements ApplicationRunner {
 
     private final static Logger logger = LoggerFactory.getLogger(CmdProcessor.class);
     private final List<Processor> proc;
+    private final Client client;
     private List<String> files = new ArrayList<>();
     private List<String> commands = new ArrayList<>();
 
@@ -31,13 +36,15 @@ public class CmdProcessor implements ApplicationRunner {
     public void run(ApplicationArguments args) throws Exception {
         logger.info("Args: {}", args);
         setupArgs(args);
+        if (null == files) return;
         for (String aFile : files) {
             processFile(aFile);
         }
+        client.getRabbitTemplate().getConnectionFactory().resetConnection();
     }
 
     private void processFile(String aFile) {
-        logger.info("!!! Processing {}", aFile);
+        if (null == commands) return;
         for (String command : commands) {
             logger.info("+++ {}: {}", command, aFile);
             processCommandOnFile(command, aFile);
@@ -59,6 +66,5 @@ public class CmdProcessor implements ApplicationRunner {
 
         void processFile(String file, ApplicationArguments args) throws RuntimeException ;
     }
-
 
 }
