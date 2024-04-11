@@ -1,6 +1,5 @@
-package dev.vk.jfc.jfcapppublisher;
+package dev.vk.jfc.app.publisher;
 
-import dev.vk.jfc.jfccommon.dto.TestMessage;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
@@ -10,5 +9,4 @@ public class JfcAppPublisherApplication {
 	public static void main(String[] args) {
 		SpringApplication.run(JfcAppPublisherApplication.class, args);
 	}
-
 }
