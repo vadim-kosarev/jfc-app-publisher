@@ -19,6 +19,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.Random;
+import java.util.UUID;
 
 @Component
 @AllArgsConstructor
@@ -50,6 +51,7 @@ public class PublishFile implements CmdProcessor.Processor {
             msgHeaders.put(ImageMessage.HeaderKeys.K_HOSTNAME, Inet4Address.getLocalHost().getHostName());
             msgHeaders.put(ImageMessage.HeaderKeys.K_LOCALID, rnd.nextInt(100000, 999999));
             msgHeaders.put(ImageMessage.HeaderKeys.K_FRAMENO, rnd.nextInt(0, 60));
+            msgHeaders.put(ImageMessage.HeaderKeys.K_UUID, UUID.randomUUID());
 
             byte[] bytes = Files.readAllBytes(filePath);
             ImageMessage.MessageFile mFile = new ImageMessage.MessageFile("image/jpeg", bytes);
