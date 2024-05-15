@@ -60,7 +60,7 @@ public class CmdProcessor implements ApplicationRunner {
         }
     }
 
-    public static interface Processor {
+    public interface Processor {
 
         String getCommand();
 

@@ -3,6 +3,7 @@ package dev.vk.jfc.app.publisher.cmd;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import dev.vk.jfc.app.publisher.config.RabbitMQConfig;
 import dev.vk.jfc.app.publisher.rabbitmq.Client;
+import dev.vk.jfc.jfccommon.Jfc;
 import dev.vk.jfc.jfccommon.dto.ImageMessage;
 import lombok.AllArgsConstructor;
 import org.slf4j.Logger;
@@ -18,6 +19,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.attribute.BasicFileAttributes;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Random;
 import java.util.UUID;
 
@@ -39,36 +42,27 @@ public class PublishFile implements CmdProcessor.Processor {
         logger.info("Publish File: {}", file);
         try {
 
-            ImageMessage.MessageHeaders msgHeaders = new ImageMessage.MessageHeaders();
-            msgHeaders.put(ImageMessage.HeaderKeys.K_BROKER_TIMESTAMP, System.currentTimeMillis());
+            Map<String, Object> msgHeaders = new HashMap<>();
+            msgHeaders.put(Jfc.K_BROKER_TIMESTAMP, System.currentTimeMillis());
 
             Path filePath = Paths.get(file);
 
             Random rnd = new Random();
             BasicFileAttributes attrs = Files.readAttributes(filePath, BasicFileAttributes.class);
-            msgHeaders.put(ImageMessage.HeaderKeys.K_TIMESTAMP, attrs.lastModifiedTime().toMillis());
-            msgHeaders.put(ImageMessage.HeaderKeys.K_SOURCE, file);
-            msgHeaders.put(ImageMessage.HeaderKeys.K_HOSTNAME, Inet4Address.getLocalHost().getHostName());
-            msgHeaders.put(ImageMessage.HeaderKeys.K_LOCALID, rnd.nextInt(100000, 999999));
-            msgHeaders.put(ImageMessage.HeaderKeys.K_FRAMENO, rnd.nextInt(0, 60));
-            msgHeaders.put(ImageMessage.HeaderKeys.K_UUID, UUID.randomUUID());
+            msgHeaders.put(Jfc.K_TIMESTAMP, attrs.lastModifiedTime().toMillis());
+            msgHeaders.put(Jfc.K_SOURCE, file);
+            msgHeaders.put(Jfc.K_HOSTNAME, Inet4Address.getLocalHost().getHostName());
+            msgHeaders.put(Jfc.K_LOCALID, rnd.nextInt(100000, 999999));
+            msgHeaders.put(Jfc.K_FRAMENO, rnd.nextInt(0, 60));
+            msgHeaders.put(Jfc.K_UUID, UUID.randomUUID());
 
-            byte[] bytes = Files.readAllBytes(filePath);
-            ImageMessage.MessageFile mFile = new ImageMessage.MessageFile("image/jpeg", bytes);
-
-            ImageMessage.Message msg = new ImageMessage.Message(msgHeaders, mFile);
-            msg.ensureValid();
-
-            ObjectMapper objectMapper = new ObjectMapper();
-            String msgStr = objectMapper.writeValueAsString(msg);
-
-            logger.info("Headers: {}", objectMapper.writeValueAsString(msgHeaders));
-            logger.info("Processing file message: {}", msgStr);
+            byte[] payload = Files.readAllBytes(filePath);
+            logger.info("Headers: {}", msgHeaders);
 
             MessageProperties mqProps = new MessageProperties();
-            mqProps.setHeaders(msg.getHeaders().copyMap());
+            mqProps.setHeaders(msgHeaders);
             Message mqMessage = MessageBuilder
-                    .withBody(msgStr.getBytes())
+                    .withBody(payload)
                     .andProperties(mqProps)
                     .build();
 
