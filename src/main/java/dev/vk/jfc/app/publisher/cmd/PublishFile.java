@@ -1,10 +1,8 @@
 package dev.vk.jfc.app.publisher.cmd;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import dev.vk.jfc.app.publisher.config.RabbitMQConfig;
 import dev.vk.jfc.app.publisher.rabbitmq.Client;
 import dev.vk.jfc.jfccommon.Jfc;
-import dev.vk.jfc.jfccommon.dto.ImageMessage;
 import lombok.AllArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -37,26 +35,25 @@ public class PublishFile implements CmdProcessor.Processor {
         return "processImage";
     }
 
-    @Override
-    public void processFile(String file, ApplicationArguments args) {
+    public void sendFile(String file) {
         logger.info("Publish File: {}", file);
         try {
 
             Map<String, Object> msgHeaders = new HashMap<>();
-            msgHeaders.put(Jfc.K_BROKER_TIMESTAMP, System.currentTimeMillis());
-
             Path filePath = Paths.get(file);
-
             Random rnd = new Random();
-            BasicFileAttributes attrs = Files.readAttributes(filePath, BasicFileAttributes.class);
-            msgHeaders.put(Jfc.K_TIMESTAMP, attrs.lastModifiedTime().toMillis());
-            msgHeaders.put(Jfc.K_SOURCE, file);
+
+            msgHeaders.put(Jfc.K_UUID, UUID.randomUUID());
+            msgHeaders.put(Jfc.K_BROKER_TIMESTAMP, System.currentTimeMillis());
             msgHeaders.put(Jfc.K_HOSTNAME, Inet4Address.getLocalHost().getHostName());
             msgHeaders.put(Jfc.K_LOCALID, rnd.nextInt(100000, 999999));
-            msgHeaders.put(Jfc.K_FRAMENO, rnd.nextInt(0, 60));
-            msgHeaders.put(Jfc.K_UUID, UUID.randomUUID());
 
             byte[] payload = Files.readAllBytes(filePath);
+            msgHeaders.put(Jfc.K_TIMESTAMP, Files.readAttributes(filePath, BasicFileAttributes.class)
+                    .lastModifiedTime().toMillis());
+            msgHeaders.put(Jfc.K_SOURCE, file);
+            msgHeaders.put(Jfc.K_FRAMENO, rnd.nextInt(0, 60));
+
             logger.info("Headers: {}", msgHeaders);
 
             MessageProperties mqProps = new MessageProperties();
@@ -75,5 +72,10 @@ public class PublishFile implements CmdProcessor.Processor {
         } catch (Exception e) {
             throw new RuntimeException("Error processing command", e);
         }
+    }
+
+    @Override
+    public void processFile(String file, ApplicationArguments args) {
+        sendFile(file);
     }
 }

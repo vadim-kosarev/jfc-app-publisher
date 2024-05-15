@@ -6,9 +6,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
-import org.springframework.context.event.ContextClosedEvent;
-import org.springframework.context.event.ContextStoppedEvent;
-import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
@@ -53,7 +50,7 @@ public class CmdProcessor implements ApplicationRunner {
 
     private void processCommandOnFile(String command, String aFile) {
         if (null == proc) return;
-        for (Processor p: proc) {
+        for (Processor p : proc) {
             if (command.equals(p.getCommand())) {
                 p.processFile(aFile, args);
             }
@@ -64,7 +61,7 @@ public class CmdProcessor implements ApplicationRunner {
 
         String getCommand();
 
-        void processFile(String file, ApplicationArguments args) throws RuntimeException ;
+        void processFile(String file, ApplicationArguments args) throws RuntimeException;
     }
 
 }
