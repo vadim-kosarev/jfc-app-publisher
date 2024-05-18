@@ -58,9 +58,7 @@ public class CmdProcessor implements ApplicationRunner {
     }
 
     public interface Processor {
-
         String getCommand();
-
         void processFile(String file, ApplicationArguments args) throws RuntimeException;
     }
 

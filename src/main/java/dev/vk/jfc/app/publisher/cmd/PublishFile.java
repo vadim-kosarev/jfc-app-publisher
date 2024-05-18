@@ -4,6 +4,7 @@ import dev.vk.jfc.app.publisher.config.RabbitMQConfig;
 import dev.vk.jfc.app.publisher.rabbitmq.Client;
 import dev.vk.jfc.jfccommon.Jfc;
 import lombok.AllArgsConstructor;
+import lombok.SneakyThrows;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.amqp.core.Message;
@@ -28,54 +29,22 @@ public class PublishFile implements CmdProcessor.Processor {
 
     private final static Logger logger = LoggerFactory.getLogger(PublishFile.class);
 
-    private final Client client;
+    private final DataSender dataSender;
 
     @Override
     public String getCommand() {
         return "processImage";
     }
 
-    public void sendFile(String file) {
-        logger.info("Publish File: {}", file);
-        try {
 
-            Map<String, Object> msgHeaders = new HashMap<>();
-            Path filePath = Paths.get(file);
-            Random rnd = new Random();
 
-            msgHeaders.put(Jfc.K_UUID, UUID.randomUUID());
-            msgHeaders.put(Jfc.K_BROKER_TIMESTAMP, System.currentTimeMillis());
-            msgHeaders.put(Jfc.K_HOSTNAME, Inet4Address.getLocalHost().getHostName());
-            msgHeaders.put(Jfc.K_LOCALID, rnd.nextInt(100000, 999999));
-
-            byte[] payload = Files.readAllBytes(filePath);
-            msgHeaders.put(Jfc.K_TIMESTAMP, Files.readAttributes(filePath, BasicFileAttributes.class)
-                    .lastModifiedTime().toMillis());
-            msgHeaders.put(Jfc.K_SOURCE, file);
-            msgHeaders.put(Jfc.K_FRAMENO, rnd.nextInt(0, 60));
-
-            logger.info("Headers: {}", msgHeaders);
-
-            MessageProperties mqProps = new MessageProperties();
-            mqProps.setHeaders(msgHeaders);
-            Message mqMessage = MessageBuilder
-                    .withBody(payload)
-                    .andProperties(mqProps)
-                    .build();
-
-            RabbitMQConfig config = client.getConfig();
-            client.getRabbitTemplate().send(
-                    config.getImages_exchange(),
-                    config.getImages_routing_key(), mqMessage);
-            logger.info("Message sent");
-
-        } catch (Exception e) {
-            throw new RuntimeException("Error processing command", e);
-        }
-    }
-
+    @SneakyThrows
     @Override
     public void processFile(String file, ApplicationArguments args) {
-        sendFile(file);
+        Path filePath = Paths.get(file);
+        byte[] payload = Files.readAllBytes(filePath);
+        long timestamp = Files.readAttributes(filePath, BasicFileAttributes.class)
+                .lastModifiedTime().toMillis();
+        dataSender.sendFile(payload, timestamp, file, 0);
     }
 }
